@@ -1,8 +1,10 @@
 import nltk
 import os
+nltk.download('punkt')
 
 Stories = {}
 Questions = {}
+
 
 # Gets the data from given Directory and puts the parsed data in dictionaries
 # TODO: make this universal but currently it is easier to do it like this in pycharm
@@ -30,7 +32,7 @@ class GetData:
                     split = i.split(':')
                     storiesText += split[1].lstrip()
             TextFlag = False
-            Stories[storyID.lstrip()] = storiesText
+            Stories[storyID.strip('\n')] = storiesText
         if fileName.endswith('.questions'):
             temp = open(dir + '/' + fileName, 'r')
             tempQuestionID = None
@@ -41,7 +43,7 @@ class GetData:
                     tempQuestionID = split[1]
                 if split[0] == 'Question':
                     tempQuestion = split[1]
-                    Questions[tempQuestionID] = tempQuestion
+                    Questions[tempQuestionID.strip('\n')] = tempQuestion
                     tempQuestionID = None
                     tempQuestion = None
 
@@ -55,8 +57,16 @@ def getQuestion(storyID):
     return questionID
 
 
+# Tokenzined using NLTK
+def token(text):
+    tokenized = nltk.sent_tokenize(text)
+    print(tokenized)
+
+
 def main():
     GetData()
+    for i, j in Stories.items():
+        token(j)
 
 
 if __name__ == "__main__":
