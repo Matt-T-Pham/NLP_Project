@@ -1,10 +1,9 @@
 import nltk
 import os
 nltk.download('punkt')
-
+nltk.download('averaged_perceptron_tagger')
 Stories = {}
 Questions = {}
-
 
 # Gets the data from given Directory and puts the parsed data in dictionaries
 # TODO: make this universal but currently it is easier to do it like this in pycharm
@@ -58,15 +57,30 @@ def getQuestion(storyID):
 
 
 # Tokenzined using NLTK
-def token(text):
-    tokenized = nltk.sent_tokenize(text)
-    print(tokenized)
+def stoiresToken(text):
+    sentTokenized = nltk.sent_tokenize(text)
+    for i in sentTokenized:
+        wordTokenized = nltk.word_tokenize(i)
+        tagged_words = nltk.pos_tag(wordTokenized)
+        print(tagged_words)
+
+
+def questionToken(question):
+    listQuestion = getQuestion(question)
+    for i in listQuestion:
+        sentTokenized = nltk.sent_tokenize(Questions[i])
+        for j in sentTokenized:
+            wordTokenized = nltk.word_tokenize(j)
+            tagged_words = nltk.pos_tag(wordTokenized)
+            print(tagged_words)
 
 
 def main():
     GetData()
     for i, j in Stories.items():
-        token(j)
+        stoiresToken(j)
+        questionToken(i)
+
 
 
 if __name__ == "__main__":
