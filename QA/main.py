@@ -4,7 +4,8 @@ import os
 Stories = {}
 Questions = {}
 
-
+# Gets the data from given Directory and puts the parsed data in dictionaries
+# TODO: make this universal but currently it is easier to do it like this in pycharm
 class GetData:
     dir = '../developset-v2'
     path = os.listdir(dir)
@@ -45,10 +46,17 @@ class GetData:
                     tempQuestion = None
 
 
+# Returns a list of storyIDs
+def getQuestion(storyID):
+    questionID = []
+    for i in Questions.keys():
+        if i.__contains__(storyID):
+            questionID.append(i)
+    return questionID
+
+
 def main():
     GetData()
-    for i,j in Stories.items():
-        print(i,j)
 
 
 if __name__ == "__main__":
