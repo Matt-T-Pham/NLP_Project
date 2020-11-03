@@ -2,12 +2,14 @@ import nltk
 import os
 nltk.download('punkt')
 nltk.download('averaged_perceptron_tagger')
+
 Stories = {}
 Questions = {}
 
 TokenizedStories = {}
 TokenizedQuestions = {}
 
+Answers = {}
 
 # Gets the data from given Directory and puts the parsed data in dictionaries
 # TODO: make this universal but currently it is easier to do it like this in pycharm
@@ -47,6 +49,7 @@ class GetData:
                 if split[0] == 'Question':
                     tempQuestion = split[1]
                     Questions[tempQuestionID.strip('\n')] = tempQuestion
+                    Answers[tempQuestionID.strip('\n')] = None
                     tempQuestionID = None
                     tempQuestion = None
 
@@ -80,13 +83,27 @@ def questionToken(question):
             TokenizedQuestions[i] = tagged_words
 
 
+def printDictionaries():
+    print("PRINTING STORIES ###########################################")
+    for i in Stories:
+        print(i, Stories[i])
+    print("PRINTING Questions #########################################")
+    for j in Questions:
+        print(j, Questions[j])
+    print("PRINTING Tokenized Stories ##################################")
+    for k in TokenizedStories:
+        print(k, TokenizedStories[k])
+    print("PRINTING Tokenized Questions ################################")
+    for l in TokenizedQuestions:
+        print(l, TokenizedQuestions[l])
+
+
 def main():
     GetData()
     for i, j in Stories.items():
-        stoiresToken(i,j)
+        stoiresToken(i, j)
         questionToken(i)
-    for k,l in TokenizedStories.items():
-        print(k,l)
+    printDictionaries()
 
 
 if __name__ == "__main__":
