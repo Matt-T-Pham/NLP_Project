@@ -98,6 +98,7 @@ def printDictionaries():
         print(l, TokenizedQuestions[l])
 
 
+#this is main
 def main():
     GetData()
     for i, j in Stories.items():
