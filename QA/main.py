@@ -11,6 +11,7 @@ TokenizedQuestions = {}
 
 Answers = {}
 
+#this is a change I made
 # Gets the data from given Directory and puts the parsed data in dictionaries
 # TODO: make this universal but currently it is easier to do it like this in pycharm
 class GetData:
