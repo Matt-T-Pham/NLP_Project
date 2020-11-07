@@ -1,9 +1,12 @@
 import nltk
 import os
 import spacy
+from nltk.corpus import stopwords
+
+nltk.download('stopwords')
+stop_words = set(stopwords.words('english'))
 
 nlp = spacy.load('en_core_web_sm')
-
 nltk.download('punkt')
 nltk.download('averaged_perceptron_tagger')
 
@@ -17,6 +20,15 @@ Answers = {}
 
 tagged = {}
 
+NamedEntityRecognition = {
+    'who': ['PERSON'],
+    'whose': ['PERSON'],
+    'where': ['LOC', 'FAC', 'ORG', 'GPE'],
+    'when': ['DATE', 'TIME'],
+    'how much':['MONEY']
+}
+
+
 # anotoher change
 # this is a change I made
 # Gets the data from given Directory and puts the parsed data in dictionaries
@@ -26,13 +38,13 @@ class GetData:
     path = os.listdir(dir)
     for fileName in path:
         if fileName.endswith('.story'):
-            temp = open(dir+'/'+fileName, 'r')
+            temp = open(dir + '/' + fileName, 'r')
             TextFlag = False
             storiesText = ""
             storyID = ""
             for i in temp:
                 if TextFlag:
-                    storiesText += str(i)
+                    storiesText += str(i.replace('\n', ''))
                 if i.__contains__('TEXT:'):
                     TextFlag = True
                 if i.__contains__('STORYID:'):
@@ -40,10 +52,10 @@ class GetData:
                     storyID = split[1]
                 if i.__contains__('HEADLINE:'):
                     split = i.split(':')
-                    storiesText += split[1].lstrip()
+                    # storiesText += split[1].lstrip()
                 if i.__contains__('DATE:'):
                     split = i.split(':')
-                    storiesText += split[1].lstrip()
+                    # storiesText += split[1].lstrip()
             TextFlag = False
             Stories[storyID.strip('\n')] = storiesText
         if fileName.endswith('.questions'):
@@ -77,8 +89,8 @@ def stoiresToken(ID, text):
     tagged_words = []
     for i in sentTokenized:
         wordTokenized = nltk.word_tokenize(i)
-        tagged_words.extend(nltk.pos_tag(wordTokenized))
-    TokenizedStories[ID] = tagged_words
+        tagged_words.extend(wordTokenized)
+    TokenizedStories[ID] = sentTokenized
 
 
 def questionToken(question):
@@ -87,8 +99,10 @@ def questionToken(question):
         sentTokenized = nltk.sent_tokenize(Questions[i])
         for j in sentTokenized:
             wordTokenized = nltk.word_tokenize(j)
-            tagged_words = nltk.pos_tag(wordTokenized)
-            TokenizedQuestions[i] = tagged_words
+            #tagged_words = nltk.pos_tag(wordTokenized)
+            wordTokenized = {w for w in wordTokenized if not w in stop_words}
+            wordTokenized = [word for word in wordTokenized if word.isalnum()]
+            TokenizedQuestions[i] = wordTokenized
 
 
 def printDictionaries():
@@ -106,21 +120,42 @@ def printDictionaries():
         print(l, TokenizedQuestions[l])
 
 
+def answerQuestions(id):
+    listQuestion = getQuestion(id)
+    for i in listQuestion:
+        for question in NamedEntityRecognition.keys():
+            if Questions[i].lower().find(question) != -1:
+                answerlist = []
+                maxi = 0
+                # print(Questions[i],question,id)
+                for key, val in tagged[id].items():
+                    if val in NamedEntityRecognition[question]:
+                        answerlist.append(key)
+                #print(Questions[i], question, answerlist)
+                #for k in answerlist:
+                 #   for tok in TokenizedStories[id]:
+                  #      if tok.find(k) != -1:
+                            #print(TokenizedQuestions[i])
+                            #print(k, '\t', tok)
+
+                Answers[i] = answerlist
 
 
 def spacyTest(key, text):
     tagged[key] = dict([(str(x), x.label_) for x in nlp(text).ents])
+
 
 def main():
     GetData()
     for i, j in Stories.items():
         stoiresToken(i, j)
         questionToken(i)
-        spacyTest(i,j)
-    for k,l in tagged.items():
-        print(k)
-        for m, n in l.items():
-            print('\t' + m + ' : ' + n)
+        spacyTest(i, j)
+    for l in Stories.keys():
+        answerQuestions(l)
+    for a, b in Answers.items():
+        print(a,b)
+
 
 
 if __name__ == "__main__":
