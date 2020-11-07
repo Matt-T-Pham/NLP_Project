@@ -25,7 +25,7 @@ NamedEntityRecognition = {
     'whose': ['PERSON'],
     'where': ['LOC', 'FAC', 'ORG', 'GPE'],
     'when': ['DATE', 'TIME'],
-    'how much':['MONEY']
+    'how much': ['MONEY']
 }
 
 
@@ -132,11 +132,11 @@ def answerQuestions(id):
                     if val in NamedEntityRecognition[question]:
                         answerlist.append(key)
                 #print(Questions[i], question, answerlist)
-                #for k in answerlist:
-                 #   for tok in TokenizedStories[id]:
-                  #      if tok.find(k) != -1:
-                            #print(TokenizedQuestions[i])
-                            #print(k, '\t', tok)
+                for k in answerlist:
+                   for tok in TokenizedStories[id]:
+                        if tok.find(k) != -1:
+                            print(TokenizedQuestions[i])
+                            print(k, '\t', tok)
 
                 Answers[i] = answerlist
 
@@ -144,6 +144,11 @@ def answerQuestions(id):
 def spacyTest(key, text):
     tagged[key] = dict([(str(x), x.label_) for x in nlp(text).ents])
 
+
+def printAns():
+    for a, b in Answers.items():
+        print('QuestionID: ' + a)
+        print('Answer: ' + str(b))
 
 def main():
     GetData()
@@ -153,8 +158,7 @@ def main():
         spacyTest(i, j)
     for l in Stories.keys():
         answerQuestions(l)
-    for a, b in Answers.items():
-        print(a,b)
+    printAns()
 
 
 
