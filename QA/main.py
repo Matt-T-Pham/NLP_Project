@@ -1,5 +1,9 @@
 import nltk
 import os
+import spacy
+
+nlp = spacy.load('en_core_web_sm')
+
 nltk.download('punkt')
 nltk.download('averaged_perceptron_tagger')
 
@@ -10,6 +14,8 @@ TokenizedStories = {}
 TokenizedQuestions = {}
 
 Answers = {}
+
+tagged = {}
 
 # anotoher change
 # this is a change I made
@@ -100,14 +106,21 @@ def printDictionaries():
         print(l, TokenizedQuestions[l])
 
 
-#this is main
-# another comment
+
+
+def spacyTest(key, text):
+    tagged[key] = dict([(str(x), x.label_) for x in nlp(text).ents])
+
 def main():
     GetData()
     for i, j in Stories.items():
         stoiresToken(i, j)
         questionToken(i)
-    printDictionaries()
+        spacyTest(i,j)
+    for k,l in tagged.items():
+        print(k)
+        for m, n in l.items():
+            print('\t' + m + ' : ' + n)
 
 
 if __name__ == "__main__":
