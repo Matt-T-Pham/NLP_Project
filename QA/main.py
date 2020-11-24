@@ -2,13 +2,17 @@ import nltk
 import os
 import spacy
 from nltk.corpus import stopwords
+import neuralcoref
 
 nltk.download('stopwords')
 stop_words = set(stopwords.words('english'))
 
-nlp = spacy.load('en_core_web_sm')
+#nlp = spacy.load('en_core_web_sm')
+nlp = spacy.load('en')
 nltk.download('punkt')
 nltk.download('averaged_perceptron_tagger')
+
+neuralcoref.add_to_pipe(nlp)
 
 Stories = {}
 Questions = {}
@@ -19,13 +23,20 @@ TokenizedQuestions = {}
 Answers = {}
 
 tagged = {}
+taggedQ = {}
+
+coref = {}
 
 NamedEntityRecognition = {
     'who': ['PERSON'],
     'whose': ['PERSON'],
     'where': ['LOC', 'FAC', 'ORG', 'GPE'],
     'when': ['DATE', 'TIME'],
-    'how much': ['MONEY']
+    'how much money': ['MONEY'],
+    'how much': ['QUANTITY'],
+    'how old': ['CARDINAL'],
+    'how often': ['DATE', 'TIME'],
+    'how': ['CARDINAL']
 }
 
 
@@ -44,7 +55,7 @@ class GetData:
             storyID = ""
             for i in temp:
                 if TextFlag:
-                    storiesText += str(i.replace('\n', ''))
+                    storiesText += str(i.replace('\n', ' '))
                 if i.__contains__('TEXT:'):
                     TextFlag = True
                 if i.__contains__('STORYID:'):
@@ -69,7 +80,7 @@ class GetData:
                 if split[0] == 'Question':
                     tempQuestion = split[1]
                     Questions[tempQuestionID.strip('\n')] = tempQuestion
-                    Answers[tempQuestionID.strip('\n')] = None
+                    Answers[tempQuestionID.strip('\n')] = []
                     tempQuestionID = None
                     tempQuestion = None
 
@@ -126,40 +137,51 @@ def answerQuestions(id):
         for question in NamedEntityRecognition.keys():
             if Questions[i].lower().find(question) != -1:
                 answerlist = []
-                maxi = 0
-                # print(Questions[i],question,id)
                 for key, val in tagged[id].items():
                     if val in NamedEntityRecognition[question]:
-                        answerlist.append(key)
-                #print(Questions[i], question, answerlist)
+                        if not answerlist.__contains__(key):
+                            answerlist.append(key)
+                max = 0.0
+                ans = []
+                print(answerlist, "+++++++++++++++++++++++++++++")
                 for k in answerlist:
                    for tok in TokenizedStories[id]:
                         if tok.find(k) != -1:
                             print(TokenizedQuestions[i])
                             print(k, '\t', tok)
-
                 Answers[i] = answerlist
 
 
-def spacyTest(key, text):
-    tagged[key] = dict([(str(x), x.label_) for x in nlp(text).ents])
+def spacyTest(key, text,flag):
+    temp1 = nlp(text)
+    temp = dict([(str(x), x.label_) for x in nlp(text).ents])
+    if flag is 1:
+        tagged[key] = temp
+        coref[key] = temp1._.coref_clusters
+    else:
+        taggedQ[key] = temp
 
 
 def printAns():
-    for a, b in Answers.items():
-        print('QuestionID: ' + a)
-        print('Answer: ' + str(b))
+    with open('results.response', 'w') as f:
+        for a,b in Answers.items():
+            f.write('QuestionID: '+a+'\n')
+            f.write('Answer:'+ ' '.join(map(str,b)))
+            #f.write('Answer:' + ' '+str(b))
+            f.write('\n')
+
 
 def main():
     GetData()
     for i, j in Stories.items():
         stoiresToken(i, j)
         questionToken(i)
-        spacyTest(i, j)
+        spacyTest(i, j,1)
+    for z,y in Questions.items():
+        spacyTest(z,y,0)
     for l in Stories.keys():
         answerQuestions(l)
     printAns()
-
 
 
 if __name__ == "__main__":

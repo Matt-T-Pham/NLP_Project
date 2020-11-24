@@ -1,4 +1,4 @@
-#!C:\Users\mtp8\Documents\GitHub\NLP_Project\venv\Scripts\python.exe
+#!/usr/bin/python3
 from __future__ import with_statement
 import os
 import sys
@@ -32,11 +32,11 @@ def run(fnames, cmd, verbose):
     fname='script to run (.py or .plac or .placet)',
     extra='additional arguments',
     )
-def main(verbose, interactive, multiline, serve, batch, test, fname='',
+def main(verbose, interactive, multiline, serve, batch, test, fname=None,
          *extra):
     "Runner for plac tools, plac batch files and plac tests"
     baseparser = plac.parser_from(main)
-    if not fname:
+    if fname is None:
         baseparser.print_help()
     elif sys.argv[1] == fname:  # script mode
         plactool = plac.import_main(fname)
@@ -64,8 +64,6 @@ def main(verbose, interactive, multiline, serve, batch, test, fname='',
         print('run %s plac test(s)' % (len(extra) + 1))
     else:
         baseparser.print_usage()
-
-
 main.add_help = False
 
 if __name__ == '__main__':
